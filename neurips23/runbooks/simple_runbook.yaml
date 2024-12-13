@@ -108,3 +108,24 @@ msspacev-1M:
   6:
     operation: "search"
   gt_url: "https://comp21storage.z5.web.core.windows.net/comp23/str_gt/MSSPACEV1B/1000000/simple_runbook.yaml"
+cirr:
+  max_pts: 10000
+  1:
+    operation: "insert"
+    start: 0
+    end: 10000
+  2:
+    operation: "search"
+  3:
+    operation: "delete"
+    start: 0
+    end: 5000
+  4:
+    operation: "search"
+  5:
+    operation: "insert"
+    start: 0
+    end: 5000
+  6:
+    operation: "search"
+  gt_url: "https://comp21storage.z5.web.core.windows.net/comp23/str_gt/random10000/10000/simple_runbook.yaml"

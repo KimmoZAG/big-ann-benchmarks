@@ -1027,16 +1027,16 @@ class SparseDataset(DatasetCompetitionFormat):
     def data_type(self):
         return "sparse"
 
-
+# (10000, 1000, 20)
 class RandomDS(DatasetCompetitionFormat):
     def __init__(self, nb, nq, d, basedir="random"):
-        self.nb = nb
-        self.nq = nq
-        self.d = d
+        self.nb = nb    # 10000 1w
+        self.nq = nq    # 1000  1k
+        self.d = d      # 20
         self.dtype = 'float32'
-        self.ds_fn = f"data_{self.nb}_{self.d}"
-        self.qs_fn = f"queries_{self.nq}_{self.d}"
-        self.gt_fn = f"gt_{self.nb}_{self.nq}_{self.d}"
+        self.ds_fn = f"data_{self.nb}_{self.d}"                     # index 个数x维度   10000 x 20
+        self.qs_fn = f"queries_{self.nq}_{self.d}"                  # query 个数x维度   1000 x 20
+        self.gt_fn = f"gt_{self.nb}_{self.nq}_{self.d}"             # 10000 x 1000 x 20, gt
         self.basedir = os.path.join(BASEDIR, f"{basedir}{self.nb}")
         if not os.path.exists(self.basedir):
             os.makedirs(self.basedir)
@@ -1048,15 +1048,16 @@ class RandomDS(DatasetCompetitionFormat):
 
         print(f"Preparing datasets with {self.nb} random points and {self.nq} queries.")
 
-
+        # 设定随机种子1，生成11k个数据
         X, _ = sklearn.datasets.make_blobs(
             n_samples=self.nb + self.nq, n_features=self.d,
             centers=self.nq, random_state=1)
 
+        # 划分为 index 和 query
         data, queries = sklearn.model_selection.train_test_split(
             X, test_size=self.nq, random_state=1)
 
-
+        # 保存文件
         with open(os.path.join(self.basedir, self.ds_fn), "wb") as f:
             np.array([self.nb, self.d], dtype='uint32').tofile(f)
             data.astype('float32').tofile(f)
@@ -1066,6 +1067,7 @@ class RandomDS(DatasetCompetitionFormat):
 
         print("Computing groundtruth")
 
+        # 为每个查询点返回100个最近邻 并保存
         nbrs = NearestNeighbors(n_neighbors=100, metric="euclidean", algorithm='brute').fit(data)
         D, I = nbrs.kneighbors(queries)
         with open(os.path.join(self.basedir, self.gt_fn), "wb") as f:
@@ -1259,7 +1261,33 @@ class OpenAIEmbedding1M(DatasetCompetitionFormat):
     def short_name(self):
         return f"{self.__class__.__name__}-{self.nb}"
 
+class CIRR(DatasetCompetitionFormat):
+    def __init__(self, nb, nq, d, basedir="cirr"):
+        self.nb = nb
+        self.nq = nq
+        self.d = d
+        self.dtype = 'float32'
+        self.ds_fn = f"data_{self.nb}_{self.d}"                     # index 个数x维度   10000 x 20
+        self.qs_fn = f"queries_{self.nq}_{self.d}"                  # query 个数x维度   1000 x 20
+        self.gt_fn = f"gt_{self.nb}_{self.nq}_{self.d}"             # 10000 x 1000 x 20, gt
+        self.basedir = os.path.join(BASEDIR, f"{basedir}{self.nb}")
+        if not os.path.exists(self.basedir):
+            os.makedirs(self.basedir)
 
+    def prepare(self, skip_data=False):
+        print("Please manually move in the data.")
+
+    def search_type(self):
+        return "knn"
+
+    def distance(self):
+        return "euclidean"
+
+    def __str__(self):
+        return f"Random({self.nb})"
+
+    def default_count(self):
+        return 10
 
 DATASETS = {
     'bigann-1B': lambda : BigANNDataset(1000),
@@ -1324,4 +1352,6 @@ DATASETS = {
     'random-filter-s': lambda : RandomFilterDS(100000, 1000, 50),
 
     'openai-embedding-1M': lambda: OpenAIEmbedding1M(93652),
+
+    'cirr': lambda :CIRR(21287, 4181, 768),
 }
