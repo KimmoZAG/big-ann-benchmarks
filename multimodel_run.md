@@ -296,9 +296,12 @@ all_metrics = {
 
 ### 3.1 Prepare Data
 
-``` python
-python create_dataset.py --dataset cirr
-```
 
+python create_dataset.py --dataset cirr
+# 移入三个文件
+# query改名后运行
 python run.py --neurips23track streaming --algorithm diskann --dataset cirr --runbook_path neurips23/runbooks/simple_runbook.yaml
+# gt改名后运行
 python benchmark/streaming/compute_gt.py --dataset cirr --runbook neurips23/runbooks/simple_runbook.yaml --gt_cmdline_tool DiskANN/build/apps/utils/compute_groundtruth
+sudo chmod 777 -R results/
+python data_export.py --out res.csv
