@@ -1289,6 +1289,34 @@ class CIRR(DatasetCompetitionFormat):
     def default_count(self):
         return 10
 
+class SIFT(DatasetCompetitionFormat):
+    def __init__(self, nb, nq, d, basedir="sift"):
+        self.nb = nb
+        self.nq = nq
+        self.d = d
+        self.dtype = 'float32'
+        self.ds_fn = f"data_{self.nb}_{self.d}"
+        self.qs_fn = f"queries_{self.nq}_{self.d}"
+        self.gt_fn = f"gt_{self.nb}_{self.nq}_{self.d}"
+        self.basedir = os.path.join(BASEDIR, f"{basedir}{self.nb}")
+        if not os.path.exists(self.basedir):
+            os.makedirs(self.basedir)
+
+    def prepare(self, skip_data=False):
+        print("Please manually move in the data.")
+
+    def search_type(self):
+        return "knn"
+
+    def distance(self):
+        return "euclidean"
+
+    def __str__(self):
+        return f"Random({self.nb})"
+
+    def default_count(self):
+        return 10
+
 DATASETS = {
     'bigann-1B': lambda : BigANNDataset(1000),
     'bigann-100M': lambda : BigANNDataset(100),
@@ -1354,4 +1382,6 @@ DATASETS = {
     'openai-embedding-1M': lambda: OpenAIEmbedding1M(93652),
 
     'cirr': lambda :CIRR(21287, 4181, 768),
+
+    'siftsmall': lambda : SIFT(10000, 100, 128)
 }
